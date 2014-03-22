@@ -8,8 +8,8 @@
 const int levelPin = 3;
 const int motorPos = 4;
 const int motorNeg = 5;
-const int seg0a = 6;
-/*const int seg0b = 7;
+/*const int seg0a = 6;
+const int seg0b = 7;
 const int seg1 = 8;
 const int seg2 = 9;
 const int seg3 = 10;
@@ -37,7 +37,7 @@ void setup()
   randomSeed(5); //No real randomness is required
 }
 
-void floorDisplay(int floorNr){
+void floorDisplay(int floorNr, int destFloor = 1){
   int dispNr;
   dispNr = floorNr;
   //set a special display for some floors
@@ -46,17 +46,19 @@ void floorDisplay(int floorNr){
   if (floorNr == 37) { dispNr = '42';}
   if (floorNr == 42) { dispNr = '1337';}  
   
-  //print dispNr;  
+  //This will be sent back to Python to show on the cams
+  String floorMsg = String(floorNr) + '/' + String(destFloor);
+  Serial.write(floorMsg);
 }
 
 void gothere(int destFloor)
 {
   int updown;
   
-  //Control the H-bridge by feeding the amount of floors and direction
+  //Control the H-bridge by feeding direction
   currentFloorRes = analogRead(levelPin);
   currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
-  floorDisplay(currentFloor);
+  floorDisplay(currentFloor, destFloor);
   
   //up or down
   if (destFloor < currentFloor){
@@ -79,17 +81,23 @@ void gothere(int destFloor)
   while (currentFloor != destFloor){
     currentFloorRes = analogRead(levelPin);
     currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
-    floorDisplay(currentFloor);
+    floorDisplay(currentFloor, destFloor);
   }
+  
   digitalWrite(motorPos, LOW);
   digitalWrite(motorNeg, LOW);
+  floorDisplay(currentFloor)
 }
 
 void loop()
 {
-  
   //DCP = feed from Defocussed Computer Perception
   DCP = Serial.read();
+  currentFloorRes = analogRead(levelPin);
+  currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
+  //floorDisplay(currentFloor, destFloor);  
+  floorDisplay(currentFloor)
+  
   if (DCP >= 0){
     gothere(DCP);
     delay(500);
