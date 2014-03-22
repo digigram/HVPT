@@ -47,9 +47,9 @@ for camNR in range(0, len(allCam)):
     cv2.namedWindow(title, cv2.CV_WINDOW_AUTOSIZE)
 
     # Read three images first:
-    t_minus = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
-    t = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
-    t_plus = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
+    img_prev = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
+    img = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
+    img_fut = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
 
     #It's called last100 but can be any size. It's dynamic
     sizeOfMotionHistory = 5
@@ -62,7 +62,7 @@ for camNR in range(0, len(allCam)):
     motion = 'None'
 
     while True:
-      dimg = diffImg(t_minus, t, t_plus)
+      dimg = diffImg(img_prev, img, img_fut)
       #print cv2.countNonZero(dimg) #to calibrate pThresh once-off
       pThresh = 150000
       mThresh = 50000
@@ -105,7 +105,7 @@ for camNR in range(0, len(allCam)):
                         #Customers will have to wait and chit chat...
              
             thresholdedImage = dimg
-            grayscaleOriginal = t 
+            grayscaleOriginal = img
             
             #Do you want the crosshair on a inverted thresholded image
             showimg = thresholdedImage 
@@ -136,9 +136,9 @@ for camNR in range(0, len(allCam)):
         cv2.imshow( title, showimg )
 
       # Read next image
-      t_minus = t
-      t = t_plus
-      t_plus = cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY)
+      img_prev = img
+      img = img_fut
+      img_fut = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
 
       key = cv2.waitKey(10)
       if key == 27:
