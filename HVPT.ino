@@ -2,7 +2,7 @@
 //http://hackaday.io/project/539-Happy-Vertical-People-Transporter
 
 //Written by DigiGram - blog.digigram.za.net
-//CC-BY-SA applies
+//GPLv3 applies (for now - see README)
 
 //define pins
 const int levelPin = 3;
