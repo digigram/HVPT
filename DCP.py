@@ -3,6 +3,13 @@ import numpy as np
 import time
 from PIL import Image
 
+##### 
+# *1: Just for testing without an Arduino attached
+nowL = '4'
+goL = ''
+initCount = 0 #### *1
+#####
+
 def average(arr):
     total = 0
     avg = 0
@@ -20,9 +27,14 @@ def currentLevelElevator():
     #lvls = serial.Serial.read()
     #read from Arduino: level currently on / level going to
     #3/1
-    lvls = '1/2'
+    global nowL
+    global goL
+    lvls = nowL + '/' + goL #### see above *1
+    #lvls = '1/2'
     currentLevel = lvls.split('/')[0]
-    goingtoLevel = lvls.split('/')[1]
+    goingtoLevel = ''
+    if len(lvls.split('/')[1]) > 0:
+      goingtoLevel = lvls.split('/')[1]
     return currentLevel, goingtoLevel
     
 #initialise
@@ -39,9 +51,10 @@ for camNr in range(0,5):
     print iscam.isOpened()
     if iscam.isOpened():
         allCam.append(iscam)
+        
        
 #iterate over all cameras
-#This only works for 1 cam for now
+#This only works for 1 cam for now. This should be inside the while loop
 for camNR in range(0, len(allCam)):
     title = "Defocused Computer Perception - Level: " + str(camLevel[camNR])
     cv2.namedWindow(title, cv2.CV_WINDOW_AUTOSIZE)
@@ -60,7 +73,7 @@ for camNR in range(0, len(allCam)):
     x0 = 0
     y0 = 0
     motion = 'None'
-
+ 
     while True:
       dimg = diffImg(img_prev, img, img_fut)
       #print cv2.countNonZero(dimg) #to calibrate pThresh once-off
@@ -90,10 +103,17 @@ for camNR in range(0, len(allCam)):
             #if motionPrev != motion: If you want to tag all motion
             #I just want to tag incoming persons
             if motion == 'Coming':
-                currLvl, goinLvl = currentLevelElevator()
+                currLvl, goingLvl = currentLevelElevator()
                 if (str(currLvl) != str(camLevel[camNR])) and (str(goingLvl) != str(camLevel[camNR])):
+                  initCount += 1 # *1
+                  if initCount > 10: # *1
+                    
                     #print str(x)+';'+str(y)
                     passenger += 1
+                    
+                    global goL #### see above *1
+                    goL = str(camLevel[camNR]) #### see above *1
+                    
                     if (passenger < 42):
                         print str(camLevel[camNR]) #this becomes a serial.Serial.write()
                     elif (passenger == 42):
@@ -129,10 +149,12 @@ for camNR in range(0, len(allCam)):
             cv2.putText(showimg, text, (xtext,ytext), cv2.FONT_HERSHEY_SIMPLEX, 1, 255) 
             ####Try to take it away when no motion is detected. it looks silly tagging an empty floor with "passenger"
         
-        lvlname = "Level " + str(camLevel[camNR])
+        lvlname = 'Level ' + str(camLevel[camNR])
         cv2.putText(showimg, lvlname, (25,25), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)   
         currLvl = 'Elevator: ' + str(currentLevelElevator()[0])
         cv2.putText(showimg, currLvl, (len(showimg)-35, 25),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+        currLvl = 'Going to: ' + str(currentLevelElevator()[1])
+        cv2.putText(showimg, currLvl, (len(showimg)-35, 60),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)        
         cv2.imshow( title, showimg )
 
       # Read next image
