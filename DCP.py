@@ -27,10 +27,9 @@ def currentLevelElevator():
     #lvls = serial.Serial.read()
     #read from Arduino: level currently on / level going to
     #3/1
-    global nowL
-    global goL
+    global nowL # *1
+    global goL # *1
     lvls = nowL + '/' + goL #### see above *1
-    #lvls = '1/2'
     currentLevel = lvls.split('/')[0]
     goingtoLevel = ''
     if len(lvls.split('/')[1]) > 0:
@@ -65,11 +64,10 @@ for camNR in range(0, len(allCam)):
     img_fut = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
 
     #It's called last100 but can be any size. It's dynamic
-    sizeOfMotionHistory = 5
+    sizeOfMotionHistory = 100
     last100 = []
     for i in range(0,sizeOfMotionHistory):
         last100.append(0)
-    last10 = [0,0,0,0,0,0,0,0,0,0]
     x0 = 0
     y0 = 0
     motion = 'None'
@@ -121,16 +119,16 @@ for camNR in range(0, len(allCam)):
                         #send the HVPT to the basement for councelling
                     if (passenger > 44):
                         passenger = 0
-                        #the HVPT will go into councelling, so it needs time. 
+                        #the HVPT will go into councelling, so it needs some time. 
                         #Customers will have to wait and chit chat...
              
             thresholdedImage = dimg
             grayscaleOriginal = img
             
-            #Do you want the crosshair on a inverted thresholded image
-            showimg = thresholdedImage 
+            #Do you want the crosshair on a thresholded image
+            ##showimg = thresholdedImage 
             #or on the grayscale original?
-            ##showimg = grayscaleOriginal
+            showimg = grayscaleOriginal
             
             #Here you can choose to have a croshair (2 line statements)    
             cv2.line(showimg, (x-10, y), (x+10, y), 255)
@@ -157,6 +155,16 @@ for camNR in range(0, len(allCam)):
         cv2.putText(showimg, currLvl, (len(showimg)-35, 60),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)        
         cv2.imshow( title, showimg )
 
+      ##### testing taking the tag away
+      lvlname = 'Level ' + str(camLevel[camNR])
+      cv2.putText(img, lvlname, (25,25), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)   
+      currLvl = 'Elevator: ' + str(currentLevelElevator()[0])
+      cv2.putText(img, currLvl, (len(img)-35, 25),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+      currLvl = 'Going to: ' + str(currentLevelElevator()[1])
+      cv2.putText(img, currLvl, (len(img)-35, 60),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)        
+      cv2.imshow( title, img )
+      #####
+      
       # Read next image
       img_prev = img
       img = img_fut
