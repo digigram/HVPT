@@ -1,3 +1,10 @@
+# Happy Vertical People Transporter
+# http://hackaday.io/project/539-Happy-Vertical-People-Transporter
+# This is the Defocused Computer Perception (DCP) module for the project
+
+# Written by DigiGram - http://blog.digigram.za.net
+# GPLv3 applies
+
 import cv2
 import numpy as np
 import time
