@@ -1,9 +1,26 @@
+#  DCP.py
+#  
+#  Copyright 2014 DigiGram <blog.digigram.za.net>
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#  
+#  
 # Happy Vertical People Transporter
 # http://hackaday.io/project/539-Happy-Vertical-People-Transporter
 # This is the Defocused Computer Perception (DCP) module for the project
-
-# Written by DigiGram - http://blog.digigram.za.net
-# GPLv3 applies
 
 import cv2
 import numpy as np
@@ -62,7 +79,7 @@ cam = [0]
 camLevel = [0]
 passenger = 0
 allCam = []
-camLevel=['1']
+camLevel=['1','2','3','4']
 
 #find and attach all connected cameras
 for camNr in range(0,5):
@@ -72,6 +89,9 @@ for camNr in range(0,5):
   if iscam.isOpened():
     allCam.append(iscam)
       
+  allCam.append(allCam[0]) #create 4 instances of the same camera 
+  allCam.append(allCam[0]) #just to develop multi-cam support while
+  allCam.append(allCam[0]) #only having one webcam
        
 #iterate over all cameras
 #This only works for 1 cam for now. This should be inside the while loop
