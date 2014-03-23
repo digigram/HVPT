@@ -8,4 +8,6 @@ We can't give Defocused Temporal Perception to our HVPT, but I can give Defocuse
 
 This repo will contain all design files and code needed to create your own HVPT.
 
-Currently the work is licenced under GPLv3. If you do however understand legal speak better than I do and have a reason to suggest another licence, please let me know. Keep in mind the licence must be compatible with: Arduino, Python, OpenCV
+Currently the code is licenced under GPLv3. If you do however understand legal speak better than I do and have a reason to suggest another licence, please let me know. Keep in mind the licence must be compatible with: Arduino, Python, OpenCV. The FreeCAD and Fritzing designs are licenced under Creative Commons as BY-SA.
+
+DigiGram / Lolla
