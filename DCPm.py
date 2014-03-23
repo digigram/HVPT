@@ -17,6 +17,22 @@ goL = ''
 initCount = 0 #### *1
 #####
 
+#initialise
+cam = [0]
+camLevel = [0]
+passenger = 0
+allCam = []
+camLevel=['1','2','3','4']
+
+for camNr in range(0,5): #find and attach all connected cameras
+  iscam = cv2.VideoCapture(camNr)
+  if iscam.isOpened():
+    allCam.append(iscam)
+      
+allCam.append(allCam[0]) # *2 create 4 instances of the same camera 
+allCam.append(allCam[0]) # *2 just to develop multi-cam support while
+allCam.append(allCam[0]) # *2 only having one webcam
+
 def average(arr):
   total = 0
   avg = 0
@@ -57,23 +73,14 @@ def currentLevelElevator():
     goingtoLevel = lvls.split('/')[1]
   return currentLevel, goingtoLevel
     
-#initialise
-cam = [0]
-camLevel = [0]
-passenger = 0
-allCam = []
-camLevel=['1','2','3','4']
-
-for camNr in range(0,5): #find and attach all connected cameras
-  iscam = cv2.VideoCapture(camNr)
-  if iscam.isOpened():
-    allCam.append(iscam)
-      
-allCam.append(allCam[0]) #create 4 instances of the same camera 
-allCam.append(allCam[0]) #just to develop multi-cam support while
-allCam.append(allCam[0]) #only having one webcam
-       
-       
+def camText(title, camNR, showimg): #text that is always displayed on all cams
+  lvlname = 'Level ' + str(camLevel[camNR])
+  cv2.putText(showimg, lvlname, (25,25), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)   
+  currLvl = 'Elevator: ' + str(currentLevelElevator()[0])
+  cv2.putText(showimg, currLvl, (len(showimg)-35, 25),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
+  currLvl = 'Going to: ' + str(currentLevelElevator()[1])
+  cv2.putText(showimg, currLvl, (len(showimg)-35, 60),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)        
+  cv2.imshow( title, showimg )
        
 def initCamWindow(camNR, allCam): #initialize all camera windows
   title = "Defocused Computer Perception - Level: " + str(camLevel[camNR])
@@ -100,8 +107,8 @@ def analyzeThreeImages(camNR, img, last100, motion, title): #analyze and tag the
   mThresh = 50000
   x0 = 0
   y0 = 0
-  #last100 = last100
-  #print last100
+
+  showimg = img[2] #Initialize showimg incase no motion is detected
   if cv2.countNonZero(dimg) > pThresh:
     moments = cv2.moments(dimg, 0) 
     area = moments['m00'] 
@@ -176,39 +183,35 @@ def analyzeThreeImages(camNR, img, last100, motion, title): #analyze and tag the
         xtext = x - 250
         ytext = y - 25
       cv2.putText(showimg, text, (xtext,ytext), cv2.FONT_HERSHEY_SIMPLEX, 1, 255) 
-    
-    lvlname = 'Level ' + str(camLevel[camNR])
-    cv2.putText(showimg, lvlname, (25,25), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)   
-    currLvl = 'Elevator: ' + str(currentLevelElevator()[0])
-    cv2.putText(showimg, currLvl, (len(showimg)-35, 25),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)
-    currLvl = 'Going to: ' + str(currentLevelElevator()[1])
-    cv2.putText(showimg, currLvl, (len(showimg)-35, 60),  cv2.FONT_HERSHEY_SIMPLEX, 1, 255)        
-    cv2.imshow( title, showimg )
+
+  camText(title, camNR, showimg)
   return last100, motion
     
-
-#initialize windows
-img = []
-last100 = []
-motion = []
-title = []
-for camNR in range(0, len(allCam)):
-  img.append('')
-  last100.append('')
-  motion.append('')
-  title.append('')
-  img[camNR], last100[camNR], motion[camNR], title[camNR] = initCamWindow(camNR, allCam)
-
-while True:
+def main():
+  #initialize windows
+  img = []
+  last100 = []
+  motion = []
+  title = []
   for camNR in range(0, len(allCam)):
-    img[camNR][0] = img[camNR][1]
-    img[camNR][1] = img[camNR][2]
-    img[camNR][2] = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)   
-    
-    last100[camNR], motion[camNR] = analyzeThreeImages(camNR, img[camNR], last100[camNR], motion[camNR], title[camNR])
+    img.append('')
+    last100.append('')
+    motion.append('')
+    title.append('')
+    img[camNR], last100[camNR], motion[camNR], title[camNR] = initCamWindow(camNR, allCam)
 
-  key = cv2.waitKey(10)
-  if key == 27:
-    cv2.destroyWindow(title)
-    break
-print "Goodbye"
+  while True:
+    for camNR in range(0, len(allCam)):
+      img[camNR][0] = img[camNR][1]
+      img[camNR][1] = img[camNR][2]
+      img[camNR][2] = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)   
+      
+      last100[camNR], motion[camNR] = analyzeThreeImages(camNR, img[camNR], last100[camNR], motion[camNR], title[camNR])
+
+    key = cv2.waitKey(10)
+    if key == 27:
+      cv2.destroyWindow(title)
+      break
+  print "Goodbye"
+
+main()
