@@ -24,6 +24,20 @@ def average(arr):
         total += n
     return total/len(arr)
     
+def tendency(arr):
+  arr2 = arr[2:len(arr)]
+  arr0 = arr[0:len(arr)-2]
+  av2 = average(arr2)
+  av0 = average(arr0)
+  if av2 > av0:
+    tendencyVal = '+'
+  elif av0 > av2:
+    tendencyVal = '-'
+  else:
+    tendencyVal = '0'
+
+  return tendencyVal
+  
 def diffImg(img0, img1, img2):
   dif1 = cv2.absdiff(img2, img1)
   dif2 = cv2.absdiff(img1, img0)
@@ -71,7 +85,7 @@ for camNR in range(0, len(allCam)):
     img_fut = cv2.flip(cv2.cvtColor(allCam[camNR].read()[1], cv2.COLOR_RGB2GRAY), 1)
 
     #It's called last100 but can be any size. It's dynamic
-    sizeOfMotionHistory = 100
+    sizeOfMotionHistory = 10
     last100 = []
     for i in range(0,sizeOfMotionHistory):
         last100.append(0)
@@ -95,17 +109,20 @@ for camNR in range(0, len(allCam)):
             dist = np.sqrt((x-x0)**2+(y-y0)**2)
             last100 = last100[1:len(last100)]
             last100.append(dist)
-            if last100[len(last100)-1]>last100[0]:
+            if tendency(last100) == '+':
+            #if last100[len(last100)-1]>average(last100):
                 motionPrev = motion
                 motion = 'Coming'
-            if last100[len(last100)-1]<last100[0]:
+            elif tendency(last100) == '-':
+            #if last100[len(last100)-1]<average(last100):
                 motionPrev = motion
                 motion = 'Going'
+            #print average(last100)
             #if abs(average(last5) - last5[4]) < 5:
             #    motionPrev = motion
             #    motion = 'None'    
             
-            #if motionPrev != motion: If you want to tag all motion
+            #if motionPrev != motion: #If you want to tag all motion
             #I just want to tag incoming persons
             if motion == 'Coming':
                 currLvl, goingLvl = currentLevelElevator()
@@ -152,7 +169,6 @@ for camNR in range(0, len(allCam)):
                 xtext = x - 250
                 ytext = y - 25
             cv2.putText(showimg, text, (xtext,ytext), cv2.FONT_HERSHEY_SIMPLEX, 1, 255) 
-            ####Try to take it away when no motion is detected. it looks silly tagging an empty floor with "passenger"
         
         lvlname = 'Level ' + str(camLevel[camNR])
         cv2.putText(showimg, lvlname, (25,25), cv2.FONT_HERSHEY_SIMPLEX, 1, 255)   
