@@ -1,32 +1,20 @@
 //Happy Vertical People Transporter
 //http://hackaday.io/project/539-Happy-Vertical-People-Transporter
 
-//Written by DigiGram - blog.digigram.za.net
-//GPLv3 applies (for now - see README)
+//Written by DigiGram - http://blog.digigram.za.net
+//GPLv3 applies
 
 //define pins
 const int levelPin = 3;
 const int motorPos = 4;
 const int motorNeg = 5;
-/*const int seg0a = 6;
-const int seg0b = 7;
-const int seg1 = 8;
-const int seg2 = 9;
-const int seg3 = 10;
-const int seg4 = 11;
-const int seg5 = 12;
-const int seg6 = 13;
-const int seg7 = ??;*/
 
 //define other variables
 int currentFloor;
 int currentFloorRes;
 int DCP;
 long rnd;
-const int maxFloor = 42;
-const int minFloor = 0;
-const int minRes = 20;  //calibrate these values
-const int maxRes = 500; //calibrate these values
+const int maxFloor = 2
 
 void setup()
 {
@@ -57,7 +45,20 @@ void gothere(int destFloor)
   
   //Control the H-bridge by feeding direction
   currentFloorRes = analogRead(levelPin);
-  currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
+  if (currentFloorRes > 640 && currentFloorRes < 735){
+    currentFloor = 0;
+  }
+  else if (currentFloorRes > 735 && currentFloorRes < 830){
+    currentFloor = 1;
+  }
+  else if (currentFloorRes > 830 && currentFloorRes < 900){
+    currentFloor = 2;
+  }
+  else { currentFloor = 0;} 
+  //if no connection to the level sensor, assume lift is in basement
+  //as soon as it moves up a bit, it should make contact again and
+  //get a good reading to act upon
+  
   floorDisplay(currentFloor, destFloor);
   
   //up or down
@@ -70,23 +71,35 @@ void gothere(int destFloor)
   
   //now tell the HVPT
   if (updown == 'up'){
-    analogWrite(motorPos, 500); //or something like this to make the motor go down slowly
+    analogWrite(motorPos, 500);
     digitalWrite(motorNeg, LOW);
+    destFloor = destFloor +1; // To deal with the design flaw.
   }
   else if (updown == 'down'){
-    analogWrite(motorNeg, 500); //or something like this to make the motor go down slowly
+    analogWrite(motorNeg, 500);
     digitalWrite(motorPos, LOW);
   }    
   
   while (currentFloor != destFloor){
     currentFloorRes = analogRead(levelPin);
-    currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
+    if (currentFloorRes > 640 && currentFloorRes < 735){
+      currentFloor = 0;
+    }
+    else if (currentFloorRes > 735 && currentFloorRes < 830){
+      currentFloor = 1;
+    }
+    else if (currentFloorRes > 830 && currentFloorRes < 900){
+      currentFloor = 2;
+    }
+    else { currentFloor = 0;}
+    
     floorDisplay(currentFloor, destFloor);
   }
+
   
   digitalWrite(motorPos, LOW);
   digitalWrite(motorNeg, LOW);
-  floorDisplay(currentFloor)
+  floorDisplay(currentFloor);
 }
 
 void loop()
@@ -94,9 +107,19 @@ void loop()
   //DCP = feed from Defocussed Computer Perception
   DCP = Serial.read();
   currentFloorRes = analogRead(levelPin);
-  currentFloor = map(currentFloorRes, minRes, maxRes, minFloor, maxFloor);  
+  if (currentFloorRes > 640 && currentFloorRes < 735){
+      currentFloor = 0;
+  }
+  else if (currentFloorRes > 735 && currentFloorRes < 830){
+    currentFloor = 1;
+  }
+  else if (currentFloorRes > 830 && currentFloorRes < 900){
+    currentFloor = 2;
+  }
+  else { currentFloor = 0;}
+    
   //floorDisplay(currentFloor, destFloor);  
-  floorDisplay(currentFloor)
+  floorDisplay(currentFloor);
   
   if (DCP >= 0){
     gothere(DCP);
